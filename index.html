@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro da ETA - Mensal</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+    h2, h3 { text-align: center; }
+    label { display: block; margin-top: 10px; }
+    input { width: 100%; padding: 8px; margin-top: 2px; }
+    button { margin-top: 10px; padding: 10px; font-size: 16px; margin-right: 10px; cursor: pointer; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { border: 1px solid #aaa; padding: 6px; text-align: center; font-size: 14px; }
+    th { background-color: #eee; }
+    .acoes button { margin: 2px; }
+    .top-buttons { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; }
+    select { padding: 10px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h2>Cadastro da ETA - Mês Atual</h2>
+
+  <form id="formulario">
+    <label>Hora (opcional):<input type="time" id="hora"></label>
+    <label>Vazão (L/s):<input type="number" step="any" id="vazao" required></label>
+    <label>Turbidez:<input type="number" step="any" id="turbidez" required></label>
+    <label>Bruta:<input type="number" step="any" id="bruta" required></label>
+    <label>Decantada 1:<input type="number" step="any" id="dec1" required></label>
+    <label>Decantada 2:<input type="number" step="any" id="dec2" required></label>
+    <label>Filtrada 1:<input type="number" step="any" id="filt1" required></label>
+    <label>Filtrada 2:<input type="number" step="any" id="filt2" required></label>
+    <label>Tratada:<input type="number" step="any" id="tratada" required></label>
+    <label>Cor Aparente:<input type="number" step="any" id="cor" required></label>
+    <label>Dosagem:<input type="number" step="any" id="dosagem" required></label>
+
+    <div class="top-buttons">
+      <button type="button" onclick="salvar()">Salvar Dados</button>
+      <button type="button" onclick="salvarEdicao()" id="btn-editar" style="display:none;">Salvar Alterações</button>
+      <button type="button" onclick="gerarExcel()">📥 Baixar Excel</button>
+      <button type="button" onclick="limparTudo()">🗑️ Limpar Tudo</button>
+    </div>
+  </form>
+
+  <h3>Registros do Dia <span id="diaAtual"></span></h3>
+
+  <label>Visualizar outro dia:</label>
+  <select id="selecionarDia" onchange="atualizarTabela(this.value)"></select>
+
+  <table id="tabela-registros">
+    <thead>
+      <tr>
+        <th>Data</th><th>Hora</th><th>Vazão</th><th>Turbidez</th><th>Bruta</th>
+        <th>Dec 1</th><th>Dec 2</th><th>Filt 1</th><th>Filt 2</th><th>Tratada</th>
+        <th>Cor</th><th>Dosagem</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const STORAGE_KEY = "cadastro_plantao";
+    let dadosPorDia = {};
+    let diaEditando = null;
+    let indexEditando = null;
+
+    // Carrega dados salvos do navegador
+    window.onload = () => {
+      const salvo = localStorage.getItem(STORAGE_KEY);
+      if (salvo) {
+        dadosPorDia = JSON.parse(salvo);
+      }
+      preencherDias();
+      atualizarTabela();
+    };
+
+    function salvar() {
+      const agora = new Date();
+      const dia = agora.getDate().toString().padStart(2, '0');
+      const nomeAba = "Dia " + dia;
+
+      const horaInput = document.getElementById("hora").value;
+      const horaFinal = horaInput ? horaInput : agora.toLocaleTimeString();
+
+      const registro = {
+        Data: agora.toLocaleDateString(),
+        Hora: horaFinal,
+        Vazão: document.getElementById("vazao").value,
+        Turbidez: document.getElementById("turbidez").value,
+        Bruta: document.getElementById("bruta").value,
+        "Decantada 1": document.getElementById("dec1").value,
+        "Decantada 2": document.getElementById("dec2").value,
+        "Filtrada 1": document.getElementById("filt1").value,
+        "Filtrada 2": document.getElementById("filt2").value,
+        Tratada: document.getElementById("tratada").value,
+        "Cor Aparente": document.getElementById("cor").value,
+        Dosagem: document.getElementById("dosagem").value
+      };
+
+      if (!dadosPorDia[nomeAba]) dadosPorDia[nomeAba] = [];
+      dadosPorDia[nomeAba].push(registro);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dadosPorDia));
+
+      document.getElementById("formulario").reset();
+      document.getElementById("hora").value = "";
+      preencherDias();
+      atualizarTabela(nomeAba);
+      alert("Dados salvos com sucesso no " + nomeAba);
+    }
+
+    function salvarEdicao() {
+      const registro = {
+        Data: new Date().toLocaleDateString(),
+        Hora: document.getElementById("hora").value || new Date().toLocaleTimeString(),
+        Vazão: document.getElementById("vazao").value,
+        Turbidez: document.getElementById("turbidez").value,
+        Bruta: document.getElementById("bruta").value,
+        "Decantada 1": document.getElementById("dec1").value,
+        "Decantada 2": document.getElementById("dec2").value,
+        "Filtrada 1": document.getElementById("filt1").value,
+        "Filtrada 2": document.getElementById("filt2").value,
+        Tratada: document.getElementById("tratada").value,
+        "Cor Aparente": document.getElementById("cor").value,
+        Dosagem: document.getElementById("dosagem").value
+      };
+
+      dadosPorDia[diaEditando][indexEditando] = registro;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dadosPorDia));
+
+      document.getElementById("formulario").reset();
+      document.getElementById("hora").value = "";
+      document.getElementById("btn-editar").style.display = "none";
+      atualizarTabela(diaEditando);
+      alert("Registro atualizado com sucesso!");
+    }
+
+    function atualizarTabela(diaSelecionado = null) {
+      const hoje = new Date();
+      const diaHoje = hoje.getDate().toString().padStart(2, '0');
+      const nomeAba = diaSelecionado || "Dia " + diaHoje;
+      document.getElementById("diaAtual").textContent = nomeAba;
+
+      const tbody = document.querySelector("#tabela-registros tbody");
+      tbody.innerHTML = "";
+
+      if (dadosPorDia[nomeAba]) {
+        dadosPorDia[nomeAba].forEach((reg, index) => {
+          const tr = document.createElement("tr");
+          Object.values(reg).forEach(valor => {
+            const td = document.createElement("td");
+            td.textContent = valor;
+            tr.appendChild(td);
+          });
+
+          const tdAcoes = document.createElement("td");
+          tdAcoes.className = "acoes";
+          tdAcoes.innerHTML = `
+            <button onclick="editarRegistro('${nomeAba}', ${index})">✏️</button>
+            <button onclick="deletarRegistro('${nomeAba}', ${index})">❌</button>`;
+          tr.appendChild(tdAcoes);
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    function editarRegistro(dia, index) {
+      const reg = dadosPorDia[dia][index];
+      document.getElementById("hora").value = reg["Hora"];
+      document.getElementById("vazao").value = reg["Vazão"];
+      document.getElementById("turbidez").value = reg["Turbidez"];
+      document.getElementById("bruta").value = reg["Bruta"];
+      document.getElementById("dec1").value = reg["Decantada 1"];
+      document.getElementById("dec2").value = reg["Decantada 2"];
+      document.getElementById("filt1").value = reg["Filtrada 1"];
+      document.getElementById("filt2").value = reg["Filtrada 2"];
+      document.getElementById("tratada").value = reg["Tratada"];
+      document.getElementById("cor").value = reg["Cor Aparente"];
+      document.getElementById("dosagem").value = reg["Dosagem"];
+
+      diaEditando = dia;
+      indexEditando = index;
+      document.getElementById("btn-editar").style.display = "inline-block";
+    }
+
+    function deletarRegistro(dia, index) {
+      if (confirm("Deseja apagar este registro?")) {
+        dadosPorDia[dia].splice(index, 1);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dadosPorDia));
+        atualizarTabela(dia);
+      }
+    }
+
+    function gerarExcel() {
+      const wb = XLSX.utils.book_new();
+      for (const dia in dadosPorDia) {
+        const ws = XLSX.utils.json_to_sheet(dadosPorDia[dia]);
+        XLSX.utils.book_append_sheet(wb, ws, dia);
+      }
+      XLSX.writeFile(wb, "cadastro_mensal.xlsx");
+    }
+
+    function limparTudo() {
+      if (confirm("Tem certeza que deseja apagar todos os dados?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        dadosPorDia = {};
+        atualizarTabela();
+        preencherDias();
+      }
+    }
+
+    function preencherDias() {
+      const select = document.getElementById("selecionarDia");
+      select.innerHTML = "";
+      for (const dia in dadosPorDia) {
+        const opt = document.createElement("option");
+        opt.value = dia;
+        opt.textContent = dia;
+        select.appendChild(opt);
+      }
+    }
+  </script>
+
+</body>
+</html>
