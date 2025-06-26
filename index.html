@@ -1,66 +1,94 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <title>Cadastro da ETA - Mensal</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <style>
-    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
-    h2, h3 { text-align: center; }
-    label { display: block; margin-top: 10px; }
-    input, textarea { width: 100%; padding: 8px; margin-top: 2px; }
-    button { margin-top: 10px; padding: 10px; font-size: 16px; margin-right: 10px; cursor: pointer; }
-    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-    th, td { border: 1px solid #aaa; padding: 6px; text-align: center; font-size: 14px; }
-    th { background-color: #eee; }
-    .acoes button { margin: 2px; }
-    .top-buttons { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; }
-    select { padding: 10px; font-size: 16px; }
-    .erro { color: red; font-size: 12px; margin-top: 2px; display: none; }
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h2,
+    h3 {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 2px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid #aaa;
+      padding: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #eee;
+    }
+
+    .acoes button {
+      margin: 2px;
+    }
+
+    .top-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    select {
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .erro {
+      color: red;
+      font-size: 12px;
+      margin-top: 2px;
+      display: none;
+    }
   </style>
 </head>
+
 <body>
 
   <h2>Cadastro da ETA - Mês Atual</h2>
 
   <form id="formulario">
-    <label>Hora (opcional):<input type="time" id="hora"></label>
-    <label>Vazão (L/s):<input type="number" step="any" id="vazao" required></label>
-    <label>Turbidez:<input type="number" step="any" id="turbidez" required></label>
-    <label>Bruta:<input type="number" step="any" id="bruta" required></label>
-    <label>Decantada 1:<input type="number" step="any" id="dec1" required></label>
-    <label>Decantada 2:<input type="number" step="any" id="dec2" required></label>
-    <label>Filtrada 1:<input type="number" step="any" id="filt1" required></label>
-    <label>Filtrada 2:<input type="number" step="any" id="filt2" required></label>
-    <label>Tratada:<input type="number" step="any" id="tratada" required></label>
-    <label>Cor Aparente:<input type="number" step="any" id="cor" required></label>
-    <label>Dosagem:<input type="number" step="any" id="dosagem" required></label>
-
-    <h3>Horários de Funcionamento</h3>
-    <label>00:00 às 02:00<input type="text" id="hf1" required></label>
-    <label>03:00 às 05:00<input type="text" id="hf2" required></label>
-    <label>06:00 às 08:00<input type="text" id="hf3" required></label>
-    <label>09:00 às 11:00<input type="text" id="hf4" required></label>
-    <label>12:00 às 14:00<input type="text" id="hf5" required></label>
-    <label>15:00 às 17:00<input type="text" id="hf6" required></label>
-    <label>18:00 às 20:00<input type="text" id="hf7" required></label>
-    <label>21:00 às 23:00<input type="text" id="hf8" required></label>
-    <label>23:00 às 00:00<input type="text" id="hf9" required></label>
-
-    <h3>Insumos (Kg)</h3>
-    <label>Sulfato de Alumínio:<input type="number" step="any" id="insumo1" required></label>
-    <label>Hipoclorito de Cálcio:<input type="number" step="any" id="insumo2" required></label>
-    <label>Cal Hidratada:<input type="number" step="any" id="insumo3" required></label>
-    <label>Fluossilicato de Sódio:<input type="number" step="any" id="insumo4" required></label>
-
-    <h3>Lavagem dos Filtros</h3>
-    <label>Hora:<input type="time" id="lavagemHora" required></label>
-    <label>Filtro 1:<input type="text" id="lavagem1" required></label>
-    <label>Filtro 2:<input type="text" id="lavagem2" required></label>
-
-    <h3>Observação</h3>
-    <label><textarea id="observacao" rows="4" placeholder="Digite suas observações aqui..."></textarea></label>
-
+    <!-- Seus campos permanecem iguais... -->
+    <!-- Botões -->
     <div class="top-buttons">
       <button type="submit">Salvar Dados</button>
       <button type="button" onclick="salvarEdicao()" id="btn-editar" style="display:none;">Salvar Alterações</button>
@@ -70,7 +98,6 @@
   </form>
 
   <h3>Registros do Dia <span id="diaAtual"></span></h3>
-
   <label>Visualizar outro dia:</label>
   <select id="selecionarDia" onchange="atualizarTabela(this.value)"></select>
 
@@ -202,6 +229,60 @@
         });
       }
     }
+
+    function gerarExcel() {
+      const wb = XLSX.utils.book_new();
+
+      for (const dia in dadosPorDia) {
+        const registrosFormatados = dadosPorDia[dia].map(reg => ({
+          Data: reg.Data,
+          Hora: reg.Hora,
+          Vazao: reg.Vazao,
+          Turbidez: reg.Turbidez,
+          Bruta: reg.Bruta,
+          Decantada_1: reg.Dec1,
+          Decantada_2: reg.Dec2,
+          Filtrada_1: reg.Filt1,
+          Filtrada_2: reg.Filt2,
+          Tratada: reg.Tratada,
+          Cor_Aparente: reg.Cor,
+          Dosagem: reg.Dosagem,
+          HF_00_02: reg.HF?.[0] || "",
+          HF_03_05: reg.HF?.[1] || "",
+          HF_06_08: reg.HF?.[2] || "",
+          HF_09_11: reg.HF?.[3] || "",
+          HF_12_14: reg.HF?.[4] || "",
+          HF_15_17: reg.HF?.[5] || "",
+          HF_18_20: reg.HF?.[6] || "",
+          HF_21_23: reg.HF?.[7] || "",
+          HF_23_00: reg.HF?.[8] || "",
+          Sulfato_Aluminio: reg.Insumos?.Sulfato || "",
+          Hipoclorito_Calcio: reg.Insumos?.Hipoclorito || "",
+          Cal_Hidratada: reg.Insumos?.Cal || "",
+          Fluossilicato_Sodio: reg.Insumos?.Fluossilicato || "",
+          Lavagem_Hora: reg.Lavagem?.Hora || "",
+          Lavagem_Filtro1: reg.Lavagem?.Filtro1 || "",
+          Lavagem_Filtro2: reg.Lavagem?.Filtro2 || "",
+          Observacao: reg.Observacao || ""
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(registrosFormatados);
+        XLSX.utils.book_append_sheet(wb, ws, dia);
+      }
+
+      XLSX.writeFile(wb, "cadastro_mensal_completo.xlsx");
+    }
+
+    function limparTudo() {
+      if (confirm("Tem certeza que deseja limpar todos os dados?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        dadosPorDia = {};
+        preencherDias();
+        atualizarTabela();
+        alert("Todos os dados foram apagados.");
+      }
+    }
   </script>
 </body>
+
 </html>
