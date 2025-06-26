@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Cadastro da ETA - Mensal</title>
+  <title>Cadastro da ETA - <span id="mesAtualTitulo"></span></title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <style>
     body {
@@ -42,6 +42,7 @@
       width: 100%;
       margin-top: 20px;
       border-collapse: collapse;
+      overflow-x: auto;
     }
 
     th,
@@ -84,33 +85,66 @@
 
 <body>
 
-  <h2>Cadastro da ETA - Mês Atual</h2>
+  <h2>Cadastro da ETA - <span id="mesAtual"></span></h2>
 
   <form id="formulario">
-    <!-- Seus campos permanecem iguais... -->
-    <!-- Botões -->
+    <label>Hora:<input type="time" id="hora"></label>
+    <label>Vazão:<input type="number" step="any" id="vazao" required></label>
+    <label>Turbidez:<input type="number" step="any" id="turbidez" required></label>
+    <label>Bruta:<input type="number" step="any" id="bruta" required></label>
+    <label>Dec 1:<input type="number" step="any" id="dec1" required></label>
+    <label>Dec 2:<input type="number" step="any" id="dec2" required></label>
+    <label>Filt 1:<input type="number" step="any" id="filt1" required></label>
+    <label>Filt 2:<input type="number" step="any" id="filt2" required></label>
+    <label>Tratada:<input type="number" step="any" id="tratada" required></label>
+    <label>Cor:<input type="number" step="any" id="cor" required></label>
+    <label>Dosagem:<input type="number" step="any" id="dosagem" required></label>
+    <label>HF (separar por vírgula):<input type="text" id="hf" required></label>
+    <label>Insumo Sulfato:<input type="number" step="any" id="insumoSulfato" required></label>
+    <label>Insumo Hipoclorito:<input type="number" step="any" id="insumoHipoclorito" required></label>
+    <label>Insumo Cal:<input type="number" step="any" id="insumoCal" required></label>
+    <label>Insumo Fluossilicato:<input type="number" step="any" id="insumoFluossilicato" required></label>
+    <label>Hora Lavagem:<input type="time" id="horaLavagem" required></label>
+    <label>Filtro 1 Lavagem:<input type="text" id="filtro1Lavagem" required></label>
+    <label>Filtro 2 Lavagem:<input type="text" id="filtro2Lavagem" required></label>
+    <label>Observação:<textarea id="observacao"></textarea></label>
     <div class="top-buttons">
-      <button type="submit">Salvar Dados</button>
-      <button type="button" onclick="salvarEdicao()" id="btn-editar" style="display:none;">Salvar Alterações</button>
-      <button type="button" onclick="gerarExcel()">📥 Baixar Excel</button>
-      <button type="button" onclick="limparTudo()">🗑️ Limpar Tudo</button>
+      <button type="submit">Salvar</button>
+      <button type="button" onclick="exportarExcel()">📥 Exportar Excel</button>
     </div>
   </form>
 
   <h3>Registros do Dia <span id="diaAtual"></span></h3>
+
   <label>Visualizar outro dia:</label>
   <select id="selecionarDia" onchange="atualizarTabela(this.value)"></select>
 
-  <table id="tabela-registros">
-    <thead>
-      <tr>
-        <th>Data</th><th>Hora</th><th>Vazão</th><th>Turbidez</th><th>Bruta</th>
-        <th>Dec 1</th><th>Dec 2</th><th>Filt 1</th><th>Filt 2</th><th>Tratada</th>
-        <th>Cor</th><th>Dosagem</th><th>Ações</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div style="overflow-x: auto">
+    <table id="tabela-registros">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Hora</th>
+          <th>Vazão</th>
+          <th>Turbidez</th>
+          <th>Bruta</th>
+          <th>Dec 1</th>
+          <th>Dec 2</th>
+          <th>Filt 1</th>
+          <th>Filt 2</th>
+          <th>Tratada</th>
+          <th>Cor</th>
+          <th>Dosagem</th>
+          <th>HF</th>
+          <th>Insumos</th>
+          <th>Lavagem</th>
+          <th>Observação</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <footer style="text-align: center; margin-top: 40px; font-size: 14px; color: #666;">
     Desenvolvido por Wallace Tadeu
@@ -119,10 +153,12 @@
   <script>
     const STORAGE_KEY = "cadastro_plantao";
     let dadosPorDia = {};
-    let diaEditando = null;
-    let indexEditando = null;
 
     window.onload = () => {
+      const data = new Date();
+      const nomeMes = data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+      document.getElementById("mesAtual").textContent = nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1);
+
       const salvo = localStorage.getItem(STORAGE_KEY);
       if (salvo) dadosPorDia = JSON.parse(salvo);
       preencherDias();
@@ -132,28 +168,13 @@
     document.getElementById("formulario").addEventListener("submit", function (e) {
       e.preventDefault();
 
-      const campos = this.querySelectorAll("input[required], textarea[required]");
-      let valido = true;
-      campos.forEach(campo => {
-        if (!campo.value.trim()) {
-          campo.style.borderColor = "red";
-          valido = false;
-        } else {
-          campo.style.borderColor = "";
-        }
-      });
-      if (!valido) {
-        alert("Preencha todos os campos obrigatórios.");
-        return;
-      }
-
       const agora = new Date();
       const dia = agora.getDate().toString().padStart(2, '0');
       const nomeAba = "Dia " + dia;
 
       const registro = {
         Data: agora.toLocaleDateString(),
-        Hora: document.getElementById("hora").value || agora.toLocaleTimeString(),
+        Hora: document.getElementById("hora").value,
         Vazao: document.getElementById("vazao").value,
         Turbidez: document.getElementById("turbidez").value,
         Bruta: document.getElementById("bruta").value,
@@ -164,17 +185,17 @@
         Tratada: document.getElementById("tratada").value,
         Cor: document.getElementById("cor").value,
         Dosagem: document.getElementById("dosagem").value,
-        HF: ["hf1","hf2","hf3","hf4","hf5","hf6","hf7","hf8","hf9"].map(id => document.getElementById(id).value),
+        HF: document.getElementById("hf").value.split(","),
         Insumos: {
-          Sulfato: document.getElementById("insumo1").value,
-          Hipoclorito: document.getElementById("insumo2").value,
-          Cal: document.getElementById("insumo3").value,
-          Fluossilicato: document.getElementById("insumo4").value
+          Sulfato: document.getElementById("insumoSulfato").value,
+          Hipoclorito: document.getElementById("insumoHipoclorito").value,
+          Cal: document.getElementById("insumoCal").value,
+          Fluossilicato: document.getElementById("insumoFluossilicato").value
         },
         Lavagem: {
-          Hora: document.getElementById("lavagemHora").value,
-          Filtro1: document.getElementById("lavagem1").value,
-          Filtro2: document.getElementById("lavagem2").value
+          Hora: document.getElementById("horaLavagem").value,
+          Filtro1: document.getElementById("filtro1Lavagem").value,
+          Filtro2: document.getElementById("filtro2Lavagem").value
         },
         Observacao: document.getElementById("observacao").value
       };
@@ -186,7 +207,6 @@
       this.reset();
       preencherDias();
       atualizarTabela(nomeAba);
-      alert("Dados salvos com sucesso no " + nomeAba);
     });
 
     function preencherDias() {
@@ -212,12 +232,37 @@
       if (dadosPorDia[nomeAba]) {
         dadosPorDia[nomeAba].forEach((reg, index) => {
           const tr = document.createElement("tr");
-          const campos = [reg.Data, reg.Hora, reg.Vazao, reg.Turbidez, reg.Bruta, reg.Dec1, reg.Dec2, reg.Filt1, reg.Filt2, reg.Tratada, reg.Cor, reg.Dosagem];
-          campos.forEach(valor => {
+
+          function td(text, highlight = false) {
             const td = document.createElement("td");
-            td.textContent = valor;
-            tr.appendChild(td);
-          });
+            td.textContent = text;
+            if (highlight) td.style.color = "red";
+            return td;
+          }
+
+          tr.appendChild(td(reg.Data));
+          tr.appendChild(td(reg.Hora));
+          tr.appendChild(td(reg.Vazao));
+          tr.appendChild(td(reg.Turbidez));
+          tr.appendChild(td(reg.Bruta));
+          tr.appendChild(td(reg.Dec1));
+          tr.appendChild(td(reg.Dec2));
+          tr.appendChild(td(reg.Filt1, parseFloat(reg.Filt1) > 0.5));
+          tr.appendChild(td(reg.Filt2, parseFloat(reg.Filt2) > 0.5));
+          tr.appendChild(td(reg.Tratada));
+          tr.appendChild(td(reg.Cor));
+          tr.appendChild(td(reg.Dosagem));
+          tr.appendChild(td((reg.HF || []).join(" | ")));
+
+          const insumo = reg.Insumos || {};
+          const insumoStr = `SA: ${insumo.Sulfato}, HC: ${insumo.Hipoclorito}, CH: ${insumo.Cal}, FS: ${insumo.Fluossilicato}`;
+          tr.appendChild(td(insumoStr));
+
+          const lav = reg.Lavagem || {};
+          const lavagemStr = `Hora: ${lav.Hora}, F1: ${lav.Filtro1}, F2: ${lav.Filtro2}`;
+          tr.appendChild(td(lavagemStr));
+
+          tr.appendChild(td(reg.Observacao || ""));
 
           const tdAcoes = document.createElement("td");
           tdAcoes.className = "acoes";
@@ -225,14 +270,14 @@
             <button onclick="editarRegistro('${nomeAba}', ${index})">✏️</button>
             <button onclick="deletarRegistro('${nomeAba}', ${index})">❌</button>`;
           tr.appendChild(tdAcoes);
+
           tbody.appendChild(tr);
         });
       }
     }
 
-    function gerarExcel() {
+    function exportarExcel() {
       const wb = XLSX.utils.book_new();
-
       for (const dia in dadosPorDia) {
         const registrosFormatados = dadosPorDia[dia].map(reg => ({
           Data: reg.Data,
@@ -240,49 +285,28 @@
           Vazao: reg.Vazao,
           Turbidez: reg.Turbidez,
           Bruta: reg.Bruta,
-          Decantada_1: reg.Dec1,
-          Decantada_2: reg.Dec2,
-          Filtrada_1: reg.Filt1,
-          Filtrada_2: reg.Filt2,
+          Dec1: reg.Dec1,
+          Dec2: reg.Dec2,
+          Filt1: reg.Filt1,
+          Filt2: reg.Filt2,
           Tratada: reg.Tratada,
-          Cor_Aparente: reg.Cor,
+          Cor: reg.Cor,
           Dosagem: reg.Dosagem,
-          HF_00_02: reg.HF?.[0] || "",
-          HF_03_05: reg.HF?.[1] || "",
-          HF_06_08: reg.HF?.[2] || "",
-          HF_09_11: reg.HF?.[3] || "",
-          HF_12_14: reg.HF?.[4] || "",
-          HF_15_17: reg.HF?.[5] || "",
-          HF_18_20: reg.HF?.[6] || "",
-          HF_21_23: reg.HF?.[7] || "",
-          HF_23_00: reg.HF?.[8] || "",
-          Sulfato_Aluminio: reg.Insumos?.Sulfato || "",
-          Hipoclorito_Calcio: reg.Insumos?.Hipoclorito || "",
-          Cal_Hidratada: reg.Insumos?.Cal || "",
-          Fluossilicato_Sodio: reg.Insumos?.Fluossilicato || "",
-          Lavagem_Hora: reg.Lavagem?.Hora || "",
-          Lavagem_Filtro1: reg.Lavagem?.Filtro1 || "",
-          Lavagem_Filtro2: reg.Lavagem?.Filtro2 || "",
-          Observacao: reg.Observacao || ""
+          HF: (reg.HF || []).join(" | "),
+          Sulfato: reg.Insumos?.Sulfato,
+          Hipoclorito: reg.Insumos?.Hipoclorito,
+          Cal: reg.Insumos?.Cal,
+          Fluossilicato: reg.Insumos?.Fluossilicato,
+          HoraLavagem: reg.Lavagem?.Hora,
+          Filtro1Lavagem: reg.Lavagem?.Filtro1,
+          Filtro2Lavagem: reg.Lavagem?.Filtro2,
+          Observacao: reg.Observacao
         }));
-
         const ws = XLSX.utils.json_to_sheet(registrosFormatados);
         XLSX.utils.book_append_sheet(wb, ws, dia);
       }
-
-      XLSX.writeFile(wb, "cadastro_mensal_completo.xlsx");
-    }
-
-    function limparTudo() {
-      if (confirm("Tem certeza que deseja limpar todos os dados?")) {
-        localStorage.removeItem(STORAGE_KEY);
-        dadosPorDia = {};
-        preencherDias();
-        atualizarTabela();
-        alert("Todos os dados foram apagados.");
-      }
+      XLSX.writeFile(wb, "cadastro_eta_mensal.xlsx");
     }
   </script>
 </body>
-
 </html>
