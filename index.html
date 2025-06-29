@@ -90,16 +90,15 @@
   <form id="formulario">
     <label>Hora:<input type="time" id="hora"></label>
     <label>Vazão:<input type="number" step="any" id="vazao" required></label>
-    <label>Turbidez:<input type="number" step="any" id="turbidez" required></label>
     <label>Bruta:<input type="number" step="any" id="bruta" required></label>
-    <label>Dec 1:<input type="number" step="any" id="dec1" required></label>
-    <label>Dec 2:<input type="number" step="any" id="dec2" required></label>
-    <label>Filt 1:<input type="number" step="any" id="filt1" required></label>
-    <label>Filt 2:<input type="number" step="any" id="filt2" required></label>
+    <label>Decantada 1:<input type="number" step="any" id="dec1" required></label>
+    <label>Deccantada 2:<input type="number" step="any" id="dec2" required></label>
+    <label>Filtrada 1:<input type="number" step="any" id="filt1" required></label>
+    <label>Filtrada 2:<input type="number" step="any" id="filt2" required></label>
     <label>Tratada:<input type="number" step="any" id="tratada" required></label>
     <label>Cor:<input type="number" step="any" id="cor" required></label>
     <label>Dosagem:<input type="number" step="any" id="dosagem" required></label>
-    <label>HF (separar por vírgula):<input type="text" id="hf" required></label>
+    <label>Horário Funcionamento:<input type="text" id="hf" required></label>
     <label>Insumo Sulfato:<input type="number" step="any" id="insumoSulfato" required></label>
     <label>Insumo Hipoclorito:<input type="number" step="any" id="insumoHipoclorito" required></label>
     <label>Insumo Cal:<input type="number" step="any" id="insumoCal" required></label>
@@ -126,16 +125,15 @@
           <th>Data</th>
           <th>Hora</th>
           <th>Vazão</th>
-          <th>Turbidez</th>
           <th>Bruta</th>
-          <th>Dec 1</th>
-          <th>Dec 2</th>
-          <th>Filt 1</th>
-          <th>Filt 2</th>
+          <th>Decantada 1</th>
+          <th>Decantada 2</th>
+          <th>Filtrada 1</th>
+          <th>Filtrada 2</th>
           <th>Tratada</th>
           <th>Cor</th>
           <th>Dosagem</th>
-          <th>HF</th>
+          <th>Horário Funcionamento</th>
           <th>Insumos</th>
           <th>Lavagem</th>
           <th>Observação</th>
@@ -176,16 +174,15 @@
         Data: agora.toLocaleDateString(),
         Hora: document.getElementById("hora").value,
         Vazao: document.getElementById("vazao").value,
-        Turbidez: document.getElementById("turbidez").value,
         Bruta: document.getElementById("bruta").value,
-        Dec1: document.getElementById("dec1").value,
-        Dec2: document.getElementById("dec2").value,
-        Filt1: document.getElementById("filt1").value,
-        Filt2: document.getElementById("filt2").value,
+        Decanta1: document.getElementById("dec1").value,
+        Decantada2: document.getElementById("dec2").value,
+        Filtrada1: document.getElementById("filt1").value,
+        Filtrada2: document.getElementById("filt2").value,
         Tratada: document.getElementById("tratada").value,
         Cor: document.getElementById("cor").value,
         Dosagem: document.getElementById("dosagem").value,
-        HF: document.getElementById("hf").value.split(","),
+        HorarioFuncionamento: document.getElementById("hf").value.split(","),
         Insumos: {
           Sulfato: document.getElementById("insumoSulfato").value,
           Hipoclorito: document.getElementById("insumoHipoclorito").value,
@@ -195,7 +192,7 @@
         Lavagem: {
           Hora: document.getElementById("horaLavagem").value,
           Filtro1: document.getElementById("filtro1Lavagem").value,
-          Filtro2: document.getElementById("filtro2Lavagem").value
+          Filtro2: document.getElementById("filtro2Lavagem").value,
         },
         Observacao: document.getElementById("observacao").value
       };
@@ -243,12 +240,11 @@
           tr.appendChild(td(reg.Data));
           tr.appendChild(td(reg.Hora));
           tr.appendChild(td(reg.Vazao));
-          tr.appendChild(td(reg.Turbidez));
           tr.appendChild(td(reg.Bruta));
-          tr.appendChild(td(reg.Dec1));
-          tr.appendChild(td(reg.Dec2));
-          tr.appendChild(td(reg.Filt1, parseFloat(reg.Filt1) > 0.5));
-          tr.appendChild(td(reg.Filt2, parseFloat(reg.Filt2) > 0.5));
+          tr.appendChild(td(reg.Decantada1));
+          tr.appendChild(td(reg.Decantada2));
+          tr.appendChild(td(reg.Filtrada1, parseFloat(reg.Filtrada1) > 0.5));
+          tr.appendChild(td(reg.Filtrada2, parseFloat(reg.Filtrada2) > 0.5));
           tr.appendChild(td(reg.Tratada));
           tr.appendChild(td(reg.Cor));
           tr.appendChild(td(reg.Dosagem));
@@ -283,16 +279,15 @@
           Data: reg.Data,
           Hora: reg.Hora,
           Vazao: reg.Vazao,
-          Turbidez: reg.Turbidez,
           Bruta: reg.Bruta,
-          Dec1: reg.Dec1,
-          Dec2: reg.Dec2,
-          Filt1: reg.Filt1,
-          Filt2: reg.Filt2,
+          Dec1: reg.Decantada1,
+          Dec2: reg.Decantada2,
+          Filt1: reg.Filtrada1,
+          Filt2: reg.Filtrada2,
           Tratada: reg.Tratada,
           Cor: reg.Cor,
           Dosagem: reg.Dosagem,
-          HF: (reg.HF || []).join(" | "),
+          HorarioFuncionamento: (reg.HF || []).join(" | "),
           Sulfato: reg.Insumos?.Sulfato,
           Hipoclorito: reg.Insumos?.Hipoclorito,
           Cal: reg.Insumos?.Cal,
