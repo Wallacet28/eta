@@ -1,0 +1,206 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f8fb;
+  margin: 0;
+  padding: 20px;
+  color: #111827;
+}
+
+h2, h3 {
+  text-align: center;
+  color: #1e3a8a;
+}
+
+form {
+  display: grid;
+  /* ALTERAÇÃO AQUI: Uma única coluna para todos os tamanhos de tela */
+  grid-template-columns: 1fr;
+  gap: 16px;
+  max-width: 1000px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+}
+
+input, textarea, select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.top-buttons {
+  /* Não precisa mais de 'span 2' se o formulário for 1 coluna */
+  grid-column: span 1; /* Mudado de span 2 para span 1 */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #3b82f6;
+}
+
+table {
+  width: 100%;
+  margin-top: 30px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  border: 1px solid #d1d5db;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background: #e0e7ff;
+  color: #1e3a8a;
+}
+
+.acoes button {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #1e3a8a;
+}
+
+select {
+  padding: 10px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+footer {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Responsivo */
+/* REMOVEMOS A MEDIA QUERY ESPECÍFICA PARA FORM, POIS AGORA É SEMPRE UMA COLUNA */
+@media (max-width: 768px) {
+  /* Esta regra agora é redundante para o form, mas mantida para top-buttons se necessário */
+  .top-buttons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  table thead {
+    display: none;
+  }
+
+  table td {
+    display: block;
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  table td:before {
+    content: attr(data-label);
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+  }
+  body.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to right, #0a192f, #1f3b73);
+    color: #fff;
+  }
+
+  .login-container {
+    background-color: #162d59;
+    padding: 30px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .login-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .login-container label {
+    margin-top: 10px;
+    display: block;
+    font-size: 14px;
+  }
+
+  .login-container input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 6px;
+    border: none;
+    font-size: 16px;
+  }
+
+  .login-container button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background-color: #1d8df0;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .login-container button:hover {
+    background-color: #0d6efd;
+  }
+
+  .erro {
+    color: #ff6b6b;
+    margin-top: 10px;
+    display: none;
+    text-align: center;
+  }
+}
