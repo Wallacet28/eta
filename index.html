@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cadastro da ETA</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -11,7 +12,7 @@
   <h2>Cadastro da ETA - <span id="mesAtual"></span></h2>
 
   <form id="formulario">
-    <label>Hora:<input type="time" id="hora"></label>
+    <label>Hora:<input type="time" id="hora" required></label>
     <label>Vazão:<input type="number" step="any" id="vazao" required></label>
     <label>Bruta:<input type="number" step="any" id="bruta" required></label>
     <label>Decantada 1:<input type="number" step="any" id="dec1" required></label>
@@ -21,19 +22,25 @@
     <label>Tratada:<input type="number" step="any" id="tratada" required></label>
     <label>Cor:<input type="number" step="any" id="cor" required></label>
     <label>Dosagem:<input type="number" step="any" id="dosagem" required></label>
-    <label>Horário Funcionamento:<input type="text" id="hf" required></label>
-    <label>Insumo Sulfato:<input type="number" step="any" id="insumoSulfato" required></label>
-    <label>Insumo Hipoclorito:<input type="number" step="any" id="insumoHipoclorito" required></label>
-    <label>Insumo Cal:<input type="number" step="any" id="insumoCal" required></label>
-    <label>Insumo Fluossilicato:<input type="number" step="any" id="insumoFluossilicato" required></label>
-    <label>Hora Lavagem:<input type="time" id="horaLavagem" required></label>
-    <label>Filtro 1 Lavagem:<input type="text" id="filtro1Lavagem" required></label>
-    <label>Filtro 2 Lavagem:<input type="text" id="filtro2Lavagem" required></label>
+
+    <!-- Campos sem validação obrigatória -->
+    <label>Horário Funcionamento:<input type="text" id="hf"></label>
+    <label>Insumo Sulfato:<input type="number" step="any" id="insumoSulfato"></label>
+    <label>Insumo Hipoclorito:<input type="number" step="any" id="insumoHipoclorito"></label>
+    <label>Insumo Cal:<input type="number" step="any" id="insumoCal"></label>
+    <label>Insumo Fluossilicato:<input type="number" step="any" id="insumoFluossilicato"></label>
+    <label>Hora Lavagem:<input type="time" id="horaLavagem"></label>
+    <label>Filtro 1 Lavagem:<input type="text" id="filtro1Lavagem"></label>
+    <label>Filtro 2 Lavagem:<input type="text" id="filtro2Lavagem"></label>
     <label>Observação:<textarea id="observacao"></textarea></label>
+
+    <!-- Novo campo: Assinatura -->
+    <label>Assinatura do Funcionário:<input type="text" id="assinatura"></label>
+
     <div class="top-buttons">
       <button type="submit">Salvar</button>
-      <button type="button" onclick="exportarExcel()">📥 Exportar Excel</button>
-      <button type="button" onclick="fazerLogout()">🚪 Sair</button> </button>
+      <button type="button" onclick="exportarExcel()">📥 Exportar Excel</button>
+      <button type="button" onclick="fazerLogout()">🚪 Sair</button>
     </div>
   </form>
 
@@ -61,6 +68,7 @@
           <th>Insumos</th>
           <th>Lavagem</th>
           <th>Observação</th>
+          <th>Assinatura</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -71,8 +79,9 @@
   <footer>
     Desenvolvido por Wallace Tadeu
   </footer>
+
   <script defer src="login.js"></script>
   <script src="script.js"></script>
-
 </body>
 </html>
+
