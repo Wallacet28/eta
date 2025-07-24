@@ -39,12 +39,12 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
         Tratada: document.getElementById("tratada").value,
         Cor: document.getElementById("cor").value,
         Dosagem: document.getElementById("dosagem").value,
-        HF: document.getElementById("hf").value.split(",").map(item => item.trim()),
+        HF: document.getElementById("hf").value,
         Insumos: {
             Sulfato: document.getElementById("insumoSulfato").value,
             Hipoclorito: document.getElementById("insumoHipoclorito").value,
             Cal: document.getElementById("insumoCal").value,
-            Fluossilicato: document.getElementById("insumoFluossilicato").value
+            Fluossilicato: document.getElementById("insumoFluossilicato").value,
         },
         Lavagem: {
             Hora: document.getElementById("horaLavagem").value,
@@ -84,7 +84,6 @@ function preencherDias() {
     }
 
     const diasOrdenados = Object.keys(dadosPorDia).sort((a, b) => parseInt(a.replace('Dia ', '')) - parseInt(b.replace('Dia ', '')));
-
     for (const dia of diasOrdenados) {
         if (dia === diaHoje && dadosPorDia[diaHoje]?.length > 0) continue;
         const opt = document.createElement("option");
@@ -105,12 +104,12 @@ function atualizarTabela(diaSelecionado = null) {
     if (dadosPorDia[nomeAba]) {
         dadosPorDia[nomeAba].forEach((reg, index) => {
             const tr = document.createElement("tr");
-            function td(text, highlight = false) {
+            const td = (text, highlight = false) => {
                 const td = document.createElement("td");
                 td.textContent = text;
                 if (highlight) td.style.color = "red";
                 return td;
-            }
+            };
             tr.appendChild(td(reg.Data));
             tr.appendChild(td(reg.Hora));
             tr.appendChild(td(reg.Vazao));
@@ -122,14 +121,21 @@ function atualizarTabela(diaSelecionado = null) {
             tr.appendChild(td(reg.Tratada));
             tr.appendChild(td(reg.Cor));
             tr.appendChild(td(reg.Dosagem));
-            tr.appendChild(td((reg.HF || []).join(" | ")));
-            tr.appendChild(td(`SA: ${reg.Insumos.Sulfato}, HC: ${reg.Insumos.Hipoclorito}, CH: ${reg.Insumos.Cal}, FS: ${reg.Insumos.Fluossilicato}`));
-            tr.appendChild(td(`Hora: ${reg.Lavagem.Hora}, F1: ${reg.Lavagem.Filtro1}, F2: ${reg.Lavagem.Filtro2}`));
+            tr.appendChild(td(reg.HF));
+            tr.appendChild(td(reg.Insumos.Sulfato));
+            tr.appendChild(td(reg.Insumos.Hipoclorito));
+            tr.appendChild(td(reg.Insumos.Cal));
+            tr.appendChild(td(reg.Insumos.Fluossilicato));
+            tr.appendChild(td(reg.Lavagem.Hora));
+            tr.appendChild(td(reg.Lavagem.Filtro1));
+            tr.appendChild(td(reg.Lavagem.Filtro2));
             tr.appendChild(td(reg.Observacao || ""));
             tr.appendChild(td(reg.Assinatura || ""));
             const tdAcoes = document.createElement("td");
             tdAcoes.className = "acoes";
-            tdAcoes.innerHTML = `<button onclick="editarRegistro('${nomeAba}', ${index})">✏️</button><button onclick="deletarRegistro('${nomeAba}', ${index})">❌</button>`;
+            tdAcoes.innerHTML = `
+                <button onclick="editarRegistro('${nomeAba}', ${index})">✏️</button>
+                <button onclick="deletarRegistro('${nomeAba}', ${index})">❌</button>`;
             tr.appendChild(tdAcoes);
             tbody.appendChild(tr);
         });
@@ -139,35 +145,34 @@ function atualizarTabela(diaSelecionado = null) {
 function exportarExcel() {
     const wb = XLSX.utils.book_new();
     const diasOrdenados = Object.keys(dadosPorDia).sort((a, b) => parseInt(a.replace('Dia ', '')) - parseInt(b.replace('Dia ', '')));
-
     for (const dia of diasOrdenados) {
         const registrosFormatados = dadosPorDia[dia].map(reg => ({
-            Data: reg.Data,
-            Hora: reg.Hora,
-            Vazao: reg.Vazao,
-            Bruta: reg.Bruta,
-            Dec1: reg.Decantada1,
-            Dec2: reg.Decantada2,
-            Filt1: reg.Filtrada1,
-            Filt2: reg.Filtrada2,
-            Tratada: reg.Tratada,
-            Cor: reg.Cor,
-            Dosagem: reg.Dosagem,
-            HF: (reg.HF || []).join(" | "),
-            Sulfato: reg.Insumos?.Sulfato,
-            Hipoclorito: reg.Insumos?.Hipoclorito,
-            Cal: reg.Insumos?.Cal,
-            Fluossilicato: reg.Insumos?.Fluossilicato,
-            HoraLavagem: reg.Lavagem?.Hora,
-            Filtro1Lavagem: reg.Lavagem?.Filtro1,
-            Filtro2Lavagem: reg.Lavagem?.Filtro2,
-            Observacao: reg.Observacao,
-            Assinatura: reg.Assinatura
+            "Data": reg.Data,
+            "Hora": reg.Hora,
+            "Vazão": reg.Vazao,
+            "Bruta": reg.Bruta,
+            "Decantada 1": reg.Decantada1,
+            "Decantada 2": reg.Decantada2,
+            "Filtrada 1": reg.Filtrada1,
+            "Filtrada 2": reg.Filtrada2,
+            "Tratada": reg.Tratada,
+            "Cor": reg.Cor,
+            "Dosagem": reg.Dosagem,
+            "Horário Funcionamento": reg.HF,
+            "Sulfato": reg.Insumos.Sulfato,
+            "Hipoclorito": reg.Insumos.Hipoclorito,
+            "Cal": reg.Insumos.Cal,
+            "Fluossilicato": reg.Insumos.Fluossilicato,
+            "Hora da Lavagem": reg.Lavagem.Hora,
+            "Filtro 1 - Lavagem": reg.Lavagem.Filtro1,
+            "Filtro 2 - Lavagem": reg.Lavagem.Filtro2,
+            "Observação": reg.Observacao,
+            "Assinatura": reg.Assinatura
         }));
         const ws = XLSX.utils.json_to_sheet(registrosFormatados);
         XLSX.utils.book_append_sheet(wb, ws, dia);
     }
-    XLSX.writeFile(wb, "cadastro_eta_mensal.xlsx");
+    XLSX.writeFile(wb, "cadastro_ETA_mensal.xlsx");
 }
 
 function editarRegistro(dia, index) {
@@ -183,7 +188,7 @@ function editarRegistro(dia, index) {
     document.getElementById("tratada").value = registro.Tratada;
     document.getElementById("cor").value = registro.Cor;
     document.getElementById("dosagem").value = registro.Dosagem;
-    document.getElementById("hf").value = (registro.HF || []).join(", ");
+    document.getElementById("hf").value = registro.HF;
     document.getElementById("insumoSulfato").value = registro.Insumos.Sulfato;
     document.getElementById("insumoHipoclorito").value = registro.Insumos.Hipoclorito;
     document.getElementById("insumoCal").value = registro.Insumos.Cal;
@@ -214,3 +219,4 @@ function fazerLogout() {
         window.location.href = "login.html";
     }
 }
+
